@@ -159,7 +159,7 @@ const Messages = () => {
                     <div
                       className={`p-2 rounded-xl max-w-xs ${
                         msg.sender_id === currentUser?.id
-                          ? "bg-blue-600"
+                          ? "bg-[#FF29D7]/70"
                           : "bg-gray-700"
                       }`}
                     >
@@ -180,7 +180,7 @@ const Messages = () => {
                 />
                 <button
                   onClick={handleSend}
-                  className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-500"
+                  className="bg-[#FF29D7]/70 px-4 py-2 rounded hover:bg-[#FF29D7]/90"
                 >
                   Enviar
                 </button>
