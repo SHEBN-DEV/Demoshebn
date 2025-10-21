@@ -2,6 +2,7 @@ import FeatureSection from './FeatureSection';
 import ContactForm from './ContactForm';
 //import GoogleCalendarWidget from './GoogleCalendarWidget';
 import PropTypes from "prop-types";
+import HomeComingSoon from './HomeComingSoon';
 
 const PINK = "#FF29D7";
 
