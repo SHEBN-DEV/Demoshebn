@@ -2,6 +2,7 @@ import FeatureSection from './FeatureSection';
 import ContactForm from './ContactForm';
 //import GoogleCalendarWidget from './GoogleCalendarWidget';
 import PropTypes from "prop-types";
+import HomeComingSoon from './HomeComingSoon';
 
 const PINK = "#FF29D7";
 
@@ -9,6 +10,8 @@ const PINK = "#FF29D7";
 const Home = ({ children }) => {
   return (
     <section className="min-h-screen flex flex-col bg-black text-white relative overflow-hidden">
+      {/* Home Coming Soon */}
+      <HomeComingSoon />
       
       {/* HERO SECTION */}
       <main className="flex-1 flex flex-col sm:flex-row items-center sm:items-start justify-between px-4 sm:px-16 relative z-10 min-h-[600px] sm:min-h-[700px]">
