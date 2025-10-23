@@ -24,7 +24,7 @@ const SignUp = () => {
     return new Promise((resolve) => {
 
       const iframe = document.createElement("iframe");
-      iframe.src = "https://verify.didit.me/start?flow=gender";  // reemplazar por la url proporcionada por didit
+      iframe.src = "https://verify.didit.me/session/BiFDYh6sfdn_";  // reemplazar por la url proporcionada por didit
       iframe.style.width = "100%";
       iframe.style.height = "600px";
       iframe.style.border = "none";
