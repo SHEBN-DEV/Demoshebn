@@ -22,14 +22,42 @@ const Messages = () => {
     getUser();
   }, []);
 
-  // carga de usuarios (ajustar segun la tabla)
+  // carga de usuarios (usando la tabla profiles)
   useEffect(() => {
     const fetchUsers = async () => {
-      const { data, error } = await supabase
-        .from("users")
-        .select("id, name, avatar");
-      if (error) console.error("Error cargando usuarios:", error);
-      else setUsers(data || []);
+      // Primero obtener los perfiles
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, full_name, user_name, email");
+      
+      if (profilesError) {
+        console.error("Error cargando perfiles:", profilesError);
+        return;
+      }
+
+      // Luego obtener los avatares por separado
+      const { data: editProfiles, error: editError } = await supabase
+        .from("edit_profile")
+        .select("user_id, avatar_url");
+
+      if (editError) {
+        console.error("Error cargando avatares:", editError);
+      }
+
+      // Combinar los datos
+      const usersWithAvatar = profiles.map(profile => {
+        const editProfile = editProfiles?.find(ep => ep.user_id === profile.id);
+        return {
+          id: profile.id,
+          name: profile.full_name || profile.user_name,
+          avatar_url: editProfile?.avatar_url || "/default-avatar.png",
+          email: profile.email,
+          user_name: profile.user_name,
+          full_name: profile.full_name
+        };
+      });
+
+      setUsers(usersWithAvatar);
     };
     fetchUsers();
   }, []);
@@ -95,7 +123,8 @@ const Messages = () => {
   };
 
   const filteredUsers = users.filter((u) =>
-    u.name?.toLowerCase().includes(search.toLowerCase())
+    (u.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+     u.user_name?.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
@@ -125,12 +154,13 @@ const Messages = () => {
                     : "hover:bg-gray-800"
                 }`}
               >
+                {/* Avatar obtenido de edit_profile */}
                 <img
-                  src={user.avatar || "/default-avatar.png"}
-                  alt={user.name}
+                  src={user.avatar_url || "/default-avatar.png"}
+                  alt={user.full_name || user.user_name}
                   className="w-8 h-8 rounded-full"
                 />
-                <span>{user.name}</span>
+                <span>{user.full_name || user.user_name}</span>
               </div>
             ))}
           </div>
@@ -142,7 +172,7 @@ const Messages = () => {
             <>
               <div className="border-b border-gray-700 pb-2 mb-4">
                 <h2 className="text-lg font-semibold">
-                  Chat con {selectedUser.name}
+                  Chat con {selectedUser.full_name || selectedUser.user_name}
                 </h2>
               </div>
 
