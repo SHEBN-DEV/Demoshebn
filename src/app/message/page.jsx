@@ -62,49 +62,65 @@ const Messages = () => {
     fetchUsers();
   }, []);
 
-  // suscribir realtime (lo mismo, ajustar segun tabla de supabase)
+  // realtime (Ajustado)
   useEffect(() => {
     if (!selectedUser || !currentUser) return;
-
+  
     const channel = supabase
-      .channel("messages-realtime")
+      .channel('messages-realtime')
       .on(
-        "postgres_changes",
+        'postgres_changes',
         {
-          event: "*",
-          schema: "public",
-          table: "messages",
-          filter: `or(sender_id.eq.${selectedUser.id},receiver_id.eq.${selectedUser.id})`,
-        },
+          event: 'INSERT', 
+          schema: 'public',
+          table: 'messages'
+          },
         (payload) => {
-          if (payload.new) {
-            setMessages((prev) => [...prev, payload.new]);
+          // Filtro eficiente en cliente
+          if (payload.new && 
+              ((payload.new.sender_id === currentUser.id && payload.new.receiver_id === selectedUser.id) ||
+               (payload.new.sender_id === selectedUser.id && payload.new.receiver_id === currentUser.id))) {
+            
+            setMessages((prev) => {
+              const exists = prev.find(msg => msg.id === payload.new.id);
+              return exists ? prev : [...prev, payload.new];
+            });
           }
         }
       )
       .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+  
+    return () => supabase.removeChannel(channel);
   }, [selectedUser, currentUser]);
 
   // carga de historial del chat
   useEffect(() => {
     const fetchMessages = async () => {
-      if (!selectedUser || !currentUser) return;
-      const { data, error } = await supabase
-        .from("messages")
-        .select("*")
-        .or(
-          `and(sender_id.eq.${currentUser.id},receiver_id.eq.${selectedUser.id}),
-           and(sender_id.eq.${selectedUser.id},receiver_id.eq.${currentUser.id})`
-        )
-        .order("created_at", { ascending: true });
-
-      if (error) console.error("Error cargando mensajes:", error);
-      else setMessages(data || []);
+      if (!selectedUser?.id || !currentUser?.id) {
+        console.log("Faltan usuarios para cargar mensajes");
+        return;
+      }
+    
+      try {
+        const { data, error } = await supabase
+          .from("messages")
+          .select("*")
+          .or(
+            `and(sender_id.eq.${currentUser.id},receiver_id.eq.${selectedUser.id}),and(sender_id.eq.${selectedUser.id},receiver_id.eq.${currentUser.id})`
+          )
+          .order("created_at", { ascending: true });
+    
+        if (error) {
+          throw error;
+        }
+    
+        setMessages(data || []);
+      } catch (error) {
+        console.error("Error detallado al cargar mensajes:", error);
+        // Opcional: mostrar notificación al usuario
+      }
     };
+    
     fetchMessages();
   }, [selectedUser, currentUser]);
 
